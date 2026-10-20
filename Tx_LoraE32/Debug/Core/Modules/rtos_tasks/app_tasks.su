@@ -1,0 +1,4 @@
+app_tasks.c:34:13:AppTasks_LogWakeState	16	static
+app_tasks.c:67:6:AppTasks_RunLoRa	112	static,ignoring_inline_asm
+app_tasks.c:251:6:AppTasks_RunSensor	24	static
+app_tasks.c:288:6:AppTasks_RunIrrigation	24	static

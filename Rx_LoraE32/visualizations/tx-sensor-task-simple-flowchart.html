@@ -1,0 +1,101 @@
+<div id="sensor-task-simple">
+  <style>
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+    #sensor-task-simple {
+      color-scheme: light dark;
+      --bg: light-dark(#f8fafc, #101827);
+      --fg: light-dark(#172033, #f1f5f9);
+      --surface: light-dark(#ffffff, #1e293b);
+      --decision: light-dark(#fff5c7, #403b2b);
+      --io: light-dark(#e6f3ff, #26394f);
+      --terminal: light-dark(#e5f8ec, #1c392b);
+      --signal: light-dark(#f2ebff, #302b49);
+      --muted: light-dark(#64748b, #aab4c5);
+      width: 100%; height: 100vh; box-sizing: border-box;
+      padding: 8px 12px 12px; display: flex; flex-direction: column;
+      color: var(--fg); background: var(--bg); font-family: Arial, sans-serif;
+    }
+    #sensor-task-simple h2 { margin: 0 0 2px; text-align: center; font-size: 21px; font-weight: 500; }
+    #sensor-task-simple p { margin: 0 0 5px; text-align: center; color: var(--muted); font-size: 12px; }
+    #sensor-task-simple svg { display: block; width: 100%; height: 100%; min-height: 0; flex: 1 1 auto; }
+    #sensor-task-simple .shape { fill: var(--surface); stroke: var(--fg); stroke-width: 1.7; }
+    #sensor-task-simple .decision { fill: var(--decision); }
+    #sensor-task-simple .io { fill: var(--io); }
+    #sensor-task-simple .terminal { fill: var(--terminal); }
+    #sensor-task-simple .signal-box { fill: var(--signal); }
+    #sensor-task-simple .flow { fill: none; stroke: var(--fg); stroke-width: 1.6; marker-end: url(#st-arrow); }
+    #sensor-task-simple .return { fill: none; stroke: var(--muted); stroke-width: 1.4; marker-end: url(#st-muted-arrow); }
+    #sensor-task-simple text { fill: var(--fg); font-size: 14px; font-weight: 400; text-anchor: middle; }
+    #sensor-task-simple .label { fill: var(--muted); font-size: 12px; font-weight: 500; }
+  </style>
+
+  <h2>LƯU ĐỒ ĐƠN GIẢN — SENSORTASK</h2>
+  <p>Tx_LoraE32 sử dụng FreeRTOS</p>
+
+  <svg viewBox="0 0 1200 900" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="st-title st-desc">
+    <title id="st-title">Lưu đồ đơn giản của SensorTask</title>
+    <desc id="st-desc">SensorTask chờ một hoặc nhiều Thread Flag, đọc toàn bộ cảm biến một lần, cập nhật snapshot rồi thông báo cho các task đã yêu cầu.</desc>
+    <defs>
+      <marker id="st-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="var(--fg)"></path></marker>
+      <marker id="st-muted-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="var(--muted)"></path></marker>
+    </defs>
+
+    <ellipse class="shape terminal" cx="600" cy="43" rx="120" ry="29"></ellipse>
+    <text x="600" y="48">SENSORTASK BẮT ĐẦU</text>
+    <path class="flow" d="M600 72V98"></path>
+
+    <rect class="shape signal-box" x="430" y="98" width="340" height="74" rx="3"></rect>
+    <text x="600" y="124"><tspan x="600">Chờ Thread Flag</tspan><tspan x="600" dy="19">SENSOR_READ · IRRIGATION_READ</tspan><tspan x="600" dy="19">TELEMETRY_READ</tspan></text>
+    <path class="flow" d="M600 172V198"></path>
+
+    <polygon class="shape decision" points="600,198 730,255 600,312 470,255"></polygon>
+    <text x="600" y="251"><tspan x="600">Nhận được ít nhất</tspan><tspan x="600" dy="19">một yêu cầu hợp lệ?</tspan></text>
+
+    <path class="return" d="M470 255H365V135H430"></path>
+    <text class="label" x="414" y="243">KHÔNG</text>
+
+    <path class="flow" d="M600 312V340"></path>
+    <text class="label" x="624" y="329">CÓ</text>
+    <polygon class="shape io" points="500,340 715,340 700,405 485,405"></polygon>
+    <text x="600" y="367"><tspan x="600">Đọc Soil 1 và Soil 2</tspan><tspan x="600" dy="19">Trung bình nhiều mẫu ADC</tspan></text>
+    <path class="flow" d="M600 405V430"></path>
+
+    <polygon class="shape io" points="500,430 715,430 700,495 485,495"></polygon>
+    <text x="600" y="457"><tspan x="600">Đọc nhiệt độ</tspan><tspan x="600" dy="19">và độ ẩm DHT11</tspan></text>
+    <path class="flow" d="M600 495V520"></path>
+
+    <polygon class="shape io" points="500,520 715,520 700,585 485,585"></polygon>
+    <text x="600" y="547"><tspan x="600">Đọc điện áp</tspan><tspan x="600" dy="19">và phần trăm pin</tspan></text>
+    <path class="flow" d="M600 585V610"></path>
+
+    <rect class="shape" x="460" y="610" width="280" height="68" rx="3"></rect>
+    <text x="600" y="637"><tspan x="600">Cập nhật Sensor Snapshot</tspan><tspan x="600" dy="19">valid và last_sensor_update_tick</tspan></text>
+    <path class="flow" d="M600 678V704"></path>
+
+    <polygon class="shape decision" points="600,704 730,760 600,816 470,760"></polygon>
+    <text x="600" y="756"><tspan x="600">Task nào đã gửi</tspan><tspan x="600" dy="19">yêu cầu đọc?</tspan></text>
+
+    <!-- LoRa response -->
+    <path class="flow" d="M470 760H315"></path>
+    <text class="label" x="393" y="748">LORATASK</text>
+    <rect class="shape signal-box" x="90" y="724" width="225" height="72" rx="3"></rect>
+    <text x="202" y="751"><tspan x="202">Set SENSOR_READY_SIGNAL</tspan><tspan x="202" dy="19">LoRaTask tạo DATA</tspan></text>
+
+    <!-- Irrigation response -->
+    <path class="flow" d="M600 816V842"></path>
+    <text class="label" x="648" y="832">IRRIGATION</text>
+    <rect class="shape signal-box" x="470" y="842" width="260" height="50" rx="3"></rect>
+    <text x="600" y="872">Set IRRIGATION_READY_SIGNAL</text>
+
+    <!-- Telemetry response -->
+    <path class="flow" d="M730 760H885"></path>
+    <text class="label" x="808" y="748">TELEMETRY</text>
+    <rect class="shape signal-box" x="885" y="724" width="225" height="72" rx="3"></rect>
+    <text x="997" y="751"><tspan x="997">Đặt telemetry_ready = 1</tspan><tspan x="997" dy="19">LoRaTask gửi Telemetry</tspan></text>
+
+    <!-- Return to wait -->
+    <path class="return" d="M202 724V655H365V135H430"></path>
+    <path class="return" d="M600 892H365V135"></path>
+    <path class="return" d="M997 724V655H835V135H770"></path>
+  </svg>
+</div>

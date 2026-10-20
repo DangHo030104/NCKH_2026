@@ -1,0 +1,245 @@
+<style>
+  #tx-stop-flow {
+    color-scheme: light dark;
+    --sf-bg: var(--background, light-dark(#ffffff, #0f172a));
+    --sf-fg: var(--foreground, light-dark(#172033, #f8fafc));
+    --sf-card: var(--card, light-dark(#ffffff, #172033));
+    --sf-muted: var(--muted-foreground, light-dark(#586174, #b7c0d1));
+    --sf-border: var(--border, light-dark(#8a96a8, #718096));
+    --sf-green: var(--green, light-dark(#18864b, #52d486));
+    --sf-yellow: var(--yellow, light-dark(#b7791f, #f4c152));
+    --sf-blue: var(--blue, light-dark(#2563eb, #67a0ff));
+    --sf-purple: var(--purple, light-dark(#7c3aed, #b69aff));
+    width: 100%;
+    color: var(--sf-fg);
+    background: var(--sf-bg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  #tx-stop-flow h1 {
+    margin: 0 0 0.25rem;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  #tx-stop-flow .subtitle {
+    margin: 0 0 0.75rem;
+    color: var(--sf-muted);
+    text-align: center;
+  }
+
+  #tx-stop-flow svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  #tx-stop-flow .node {
+    fill: color-mix(in srgb, var(--sf-card) 94%, transparent);
+    stroke: var(--sf-fg);
+    stroke-width: 2;
+  }
+
+  #tx-stop-flow .start-end {
+    fill: color-mix(in srgb, var(--sf-green) 18%, var(--sf-card));
+  }
+
+  #tx-stop-flow .decision {
+    fill: color-mix(in srgb, var(--sf-yellow) 15%, var(--sf-card));
+  }
+
+  #tx-stop-flow .sleep {
+    fill: color-mix(in srgb, var(--sf-purple) 16%, var(--sf-card));
+  }
+
+  #tx-stop-flow .wake {
+    fill: color-mix(in srgb, var(--sf-blue) 15%, var(--sf-card));
+  }
+
+  #tx-stop-flow .flow,
+  #tx-stop-flow .loop {
+    fill: none;
+    stroke: var(--sf-fg);
+    stroke-width: 2;
+    marker-end: url(#sf-arrow);
+  }
+
+  #tx-stop-flow .loop {
+    stroke: var(--sf-muted);
+    marker-end: url(#sf-arrow-muted);
+  }
+
+  #tx-stop-flow text {
+    fill: var(--sf-fg);
+    font-size: 19px;
+    text-anchor: middle;
+  }
+
+  #tx-stop-flow .branch {
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  #tx-stop-flow .note {
+    font-size: 16px;
+    fill: var(--sf-muted);
+  }
+</style>
+
+<section id="tx-stop-flow" aria-labelledby="tx-stop-title">
+  <h1 id="tx-stop-title">LƯU ĐỒ STOP MODE — TX_LORAE32</h1>
+  <p class="subtitle">STM32 chỉ ngủ khi toàn bộ hệ thống rảnh; RTC Alarm và LoRa AUX có thể đánh thức hệ thống</p>
+
+  <svg viewBox="0 0 1100 1850" role="img" aria-labelledby="sf-svg-title sf-svg-desc">
+    <title id="sf-svg-title">Lưu đồ vào và thoát STOP mode của Tx_LoraE32</title>
+    <desc id="sf-svg-desc">LoRaTask kiểm tra điều kiện rảnh, đưa E32 vào power-saving, đặt RTC Alarm khi cần, đưa STM32 vào STOP rồi xử lý nguồn đánh thức từ RTC hoặc LoRa AUX.</desc>
+
+    <defs>
+      <marker id="sf-arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L0,6 L9,3 z" fill="var(--sf-fg)"></path>
+      </marker>
+      <marker id="sf-arrow-muted" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L0,6 L9,3 z" fill="var(--sf-muted)"></path>
+      </marker>
+    </defs>
+
+    <!-- Chuẩn bị vào STOP -->
+    <ellipse class="node start-end" cx="550" cy="45" rx="145" ry="30"></ellipse>
+    <text x="550" y="52">LoRaTask đang chạy</text>
+
+    <path class="flow" d="M550 75 V110"></path>
+    <rect class="node" x="345" y="110" width="410" height="78" rx="5"></rect>
+    <text x="550" y="140">
+      <tspan x="550">Xử lý frame đã nhận và</tspan>
+      <tspan x="550" dy="26">phục vụ telemetry đang chờ</tspan>
+    </text>
+
+    <path class="flow" d="M550 188 V224"></path>
+    <polygon class="node decision" points="550,224 735,300 550,376 365,300"></polygon>
+    <text x="550" y="278">
+      <tspan x="550">Hệ thống đủ điều kiện</tspan>
+      <tspan x="550" dy="26">vào STOP?</tspan>
+      <tspan class="note" x="550" dy="25">Không tưới · không telemetry · không frame · AUX HIGH</tspan>
+    </text>
+
+    <path class="loop" d="M365 300 H125 V149 H345"></path>
+    <text class="branch" x="330" y="286">KHÔNG</text>
+    <text class="note" x="220" y="280">Delay 5 ms rồi kiểm tra lại</text>
+
+    <path class="flow" d="M550 376 V413"></path>
+    <text class="branch" x="573" y="399">CÓ</text>
+    <rect class="node" x="350" y="413" width="400" height="78" rx="5"></rect>
+    <text x="550" y="443">
+      <tspan x="550">Chuyển LoRa E32 sang</tspan>
+      <tspan x="550" dy="26">Power-Saving: M1=1, M0=0</tspan>
+    </text>
+
+    <path class="flow" d="M550 491 V526"></path>
+    <polygon class="node decision" points="550,526 700,590 550,654 400,590"></polygon>
+    <text x="550" y="583">
+      <tspan x="550">AUX sẵn sàng</tspan>
+      <tspan x="550" dy="26">trong 100 ms?</tspan>
+    </text>
+
+    <path class="loop" d="M400 590 H160 V452 H350"></path>
+    <text class="branch" x="365" y="576">KHÔNG</text>
+    <text class="note" x="252" y="570">Trả E32 về Normal</text>
+
+    <path class="flow" d="M550 654 V690"></path>
+    <text class="branch" x="573" y="678">CÓ</text>
+    <rect class="node" x="325" y="690" width="450" height="82" rx="5"></rect>
+    <text x="550" y="720">
+      <tspan x="550">Khóa IRQ ngắn; xóa cờ wake cũ</tspan>
+      <tspan x="550" dy="26">và pending EXTI của chân AUX</tspan>
+    </text>
+
+    <path class="flow" d="M550 772 V807"></path>
+    <polygon class="node decision" points="550,807 735,883 550,959 365,883"></polygon>
+    <text x="550" y="862">
+      <tspan x="550">AUTO và irrigation state</tspan>
+      <tspan x="550" dy="26">là IDLE hoặc FAILED?</tspan>
+    </text>
+
+    <path class="flow" d="M365 883 H180 V1004 H350"></path>
+    <text class="branch" x="333" y="870">KHÔNG</text>
+    <rect class="node" x="20" y="910" width="280" height="72" rx="5"></rect>
+    <text x="160" y="941">
+      <tspan x="160">Hủy RTC Alarm</tspan>
+      <tspan class="note" x="160" dy="24">Không cần đo định kỳ</tspan>
+    </text>
+
+    <path class="flow" d="M550 959 V990"></path>
+    <text class="branch" x="573" y="980">CÓ</text>
+    <rect class="node" x="350" y="990" width="400" height="82" rx="5"></rect>
+    <text x="550" y="1020">
+      <tspan x="550">Giữ hoặc đặt RTC Alarm</tspan>
+      <tspan x="550" dy="26">sau RTC_WAKEUP_INTERVAL_SEC</tspan>
+    </text>
+
+    <path class="flow" d="M550 1072 V1106"></path>
+    <polygon class="node decision" points="550,1106 735,1182 550,1258 365,1182"></polygon>
+    <text x="550" y="1160">
+      <tspan x="550">Kiểm tra nguyên tử lần cuối:</tspan>
+      <tspan x="550" dy="26">không cờ wake, frame, RXNE?</tspan>
+      <tspan class="note" x="550" dy="25">Đồng thời kiểm tra lại CanEnterStop()</tspan>
+    </text>
+
+    <path class="loop" d="M365 1182 H105 V452 H350"></path>
+    <text class="branch" x="330" y="1168">KHÔNG</text>
+    <text class="note" x="218" y="1208">Bỏ STOP, trả E32 về Normal</text>
+
+    <path class="flow" d="M550 1258 V1290"></path>
+    <text class="branch" x="573" y="1280">CÓ</text>
+    <rect class="node" x="335" y="1290" width="430" height="82" rx="5"></rect>
+    <text x="550" y="1320">
+      <tspan x="550">Xóa pending wake, tắt LED;</tspan>
+      <tspan x="550" dy="26">dừng HAL tick và FreeRTOS SysTick</tspan>
+    </text>
+
+    <path class="flow" d="M550 1372 V1405"></path>
+    <rect class="node sleep" x="320" y="1405" width="460" height="78" rx="5"></rect>
+    <text x="550" y="1435">
+      <tspan x="550">STM32 VÀO STOP MODE</tspan>
+      <tspan x="550" dy="26">Low-power regulator + WFI</tspan>
+    </text>
+
+    <!-- Thức dậy và xử lý nguồn wake -->
+    <path class="flow" d="M550 1483 V1516"></path>
+    <rect class="node wake" x="310" y="1516" width="480" height="82" rx="5"></rect>
+    <text x="550" y="1546">
+      <tspan x="550">Có ngắt đánh thức → khôi phục SystemClock,</tspan>
+      <tspan x="550" dy="26">HAL tick, SysTick, LED và bật lại IRQ</tspan>
+    </text>
+
+    <path class="flow" d="M550 1598 V1630"></path>
+    <polygon class="node decision" points="550,1630 710,1695 550,1760 390,1695"></polygon>
+    <text x="550" y="1688">
+      <tspan x="550">Nguồn đánh thức?</tspan>
+      <tspan class="note" x="550" dy="25">RTC Alarm / LoRa AUX / cả hai</tspan>
+    </text>
+
+    <path class="flow" d="M390 1695 H190"></path>
+    <text class="branch" x="300" y="1680">RTC</text>
+    <rect class="node wake" x="10" y="1640" width="180" height="110" rx="5"></rect>
+    <text x="100" y="1676">
+      <tspan x="100">Yêu cầu</tspan>
+      <tspan x="100" dy="24">SensorTask đo</tspan>
+      <tspan class="note" x="100" dy="23">AUTO IDLE/FAILED</tspan>
+    </text>
+
+    <path class="flow" d="M710 1695 H910"></path>
+    <text class="branch" x="805" y="1680">LORA AUX</text>
+    <rect class="node wake" x="910" y="1640" width="180" height="110" rx="5"></rect>
+    <text x="1000" y="1676">
+      <tspan x="1000">Chờ frame UART</tspan>
+      <tspan x="1000" dy="24">rồi xử lý CMD</tspan>
+      <tspan class="note" x="1000" dy="23">Có timeout bảo vệ</tspan>
+    </text>
+
+    <path class="loop" d="M100 1750 V1780 H550"></path>
+    <path class="loop" d="M1000 1750 V1780 H550"></path>
+    <path class="flow" d="M550 1780 V1800"></path>
+    <ellipse class="node start-end" cx="550" cy="1825" rx="170" ry="28"></ellipse>
+    <text x="550" y="1832">Quay lại vòng lặp LoRaTask</text>
+  </svg>
+</section>

@@ -1,0 +1,343 @@
+<style>
+  #rx-lora-flow {
+    color-scheme: light dark;
+    --rx-background: var(--background, light-dark(#ffffff, #0f172a));
+    --rx-foreground: var(--foreground, light-dark(#172033, #f8fafc));
+    --rx-card: var(--card, light-dark(#ffffff, #172033));
+    --rx-muted-foreground: var(--muted-foreground, light-dark(#586174, #b7c0d1));
+    --rx-secondary: var(--secondary, light-dark(#eef2f7, #263247));
+    --rx-border: var(--border, light-dark(#9aa4b3, #68758a));
+    --rx-green: var(--green, light-dark(#18864b, #52d486));
+    --rx-yellow: var(--yellow, light-dark(#b7791f, #f4c152));
+    --rx-blue: var(--blue, light-dark(#2563eb, #67a0ff));
+    --rx-purple: var(--purple, light-dark(#7c3aed, #b69aff));
+    color: var(--rx-foreground);
+    background: var(--rx-background);
+    width: 100%;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  #rx-lora-flow h1 {
+    margin: 0 0 0.25rem;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  #rx-lora-flow .subtitle {
+    margin: 0 0 1rem;
+    color: var(--rx-muted-foreground);
+    text-align: center;
+  }
+
+  #rx-lora-flow .diagram {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  #rx-lora-flow .node {
+    fill: color-mix(in srgb, var(--rx-card) 92%, transparent);
+    stroke: var(--rx-foreground);
+    stroke-width: 2;
+  }
+
+  #rx-lora-flow .start {
+    fill: color-mix(in srgb, var(--rx-green) 18%, var(--rx-card));
+  }
+
+  #rx-lora-flow .decision {
+    fill: color-mix(in srgb, var(--rx-yellow) 14%, var(--rx-card));
+  }
+
+  #rx-lora-flow .io {
+    fill: color-mix(in srgb, var(--rx-blue) 14%, var(--rx-card));
+  }
+
+  #rx-lora-flow .task-title {
+    fill: color-mix(in srgb, var(--rx-secondary) 88%, transparent);
+    stroke: var(--rx-border);
+    stroke-width: 2;
+  }
+
+  #rx-lora-flow .flow {
+    fill: none;
+    stroke: var(--rx-foreground);
+    stroke-width: 2;
+    marker-end: url(#rx-arrow);
+  }
+
+  #rx-lora-flow .loop {
+    fill: none;
+    stroke: var(--rx-muted-foreground);
+    stroke-width: 2;
+    marker-end: url(#rx-arrow-muted);
+  }
+
+  #rx-lora-flow .exchange {
+    fill: none;
+    stroke: var(--rx-purple);
+    stroke-width: 2.5;
+    stroke-dasharray: 9 7;
+    marker-end: url(#rx-arrow-purple);
+  }
+
+  #rx-lora-flow text {
+    fill: var(--rx-foreground);
+    font-size: 20px;
+    text-anchor: middle;
+  }
+
+  #rx-lora-flow .small {
+    font-size: 17px;
+    fill: var(--rx-muted-foreground);
+  }
+
+  #rx-lora-flow .branch {
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  #rx-lora-flow .task-name {
+    font-size: 23px;
+    font-weight: 500;
+  }
+
+  #rx-lora-flow .queue-label {
+    font-size: 17px;
+    fill: var(--rx-purple);
+    font-weight: 500;
+  }
+
+  #rx-lora-flow .fork {
+    fill: var(--rx-foreground);
+  }
+</style>
+
+<section id="rx-lora-flow" aria-labelledby="rx-flow-title">
+  <h1 id="rx-flow-title">LƯU ĐỒ GIẢI THUẬT RX_LORAE32 — FREERTOS</h1>
+  <p class="subtitle">Ba task chạy đồng thời; đường nét đứt biểu diễn queue hoặc tín hiệu trao đổi giữa các task</p>
+
+  <svg class="diagram" viewBox="0 0 1500 1390" role="img" aria-labelledby="rx-svg-title rx-svg-desc">
+    <title id="rx-svg-title">Lưu đồ tổng thể chương trình Rx_LoraE32 dùng FreeRTOS</title>
+    <desc id="rx-svg-desc">Khởi tạo hệ thống rồi tách thành LoRaTask, MQTTTask và DisplayTask. LoRaTask nhận dữ liệu cảm biến và gửi lệnh; MQTTTask kết nối WiFi, MQTT, nhận lệnh từ web và đăng dữ liệu; DisplayTask cập nhật màn hình TFT.</desc>
+
+    <defs>
+      <marker id="rx-arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L0,6 L9,3 z" fill="var(--rx-foreground)"></path>
+      </marker>
+      <marker id="rx-arrow-muted" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L0,6 L9,3 z" fill="var(--rx-muted-foreground)"></path>
+      </marker>
+      <marker id="rx-arrow-purple" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L0,6 L9,3 z" fill="var(--rx-purple)"></path>
+      </marker>
+    </defs>
+
+    <!-- Khởi tạo -->
+    <ellipse class="node start" cx="750" cy="42" rx="115" ry="28"></ellipse>
+    <text x="750" y="49">BẮT ĐẦU / RESET</text>
+
+    <path class="flow" d="M750 70 V100"></path>
+    <rect class="node" x="575" y="100" width="350" height="76" rx="5"></rect>
+    <text x="750" y="130">
+      <tspan x="750">Khởi tạo Serial, GPIO và</tspan>
+      <tspan x="750" dy="25">các queue FreeRTOS</tspan>
+    </text>
+
+    <path class="flow" d="M750 176 V206"></path>
+    <rect class="node" x="535" y="206" width="430" height="96" rx="5"></rect>
+    <text x="750" y="236">
+      <tspan x="750">Khởi tạo Display, LoRa E32,</tspan>
+      <tspan x="750" dy="25">WiFi và MQTT</tspan>
+      <tspan x="750" dy="25">Tạo LoRaTask · MQTTTask · DisplayTask</tspan>
+    </text>
+
+    <path class="flow" d="M750 302 V337"></path>
+    <rect class="node" x="610" y="337" width="280" height="60" rx="5"></rect>
+    <text x="750" y="374">Chạy scheduler FreeRTOS</text>
+
+    <path class="flow" d="M750 397 V428"></path>
+    <rect class="fork" x="92" y="428" width="1316" height="9" rx="4"></rect>
+    <path class="flow" d="M280 437 V478"></path>
+    <path class="flow" d="M750 437 V478"></path>
+    <path class="flow" d="M1220 437 V478"></path>
+
+    <!-- Tiêu đề ba task -->
+    <rect class="task-title" x="70" y="478" width="420" height="56" rx="6"></rect>
+    <text class="task-name" x="280" y="514">LORATASK — GIAO TIẾP E32</text>
+
+    <rect class="task-title" x="540" y="478" width="420" height="56" rx="6"></rect>
+    <text class="task-name" x="750" y="514">MQTTTASK — WIFI VÀ CLOUD</text>
+
+    <rect class="task-title" x="1010" y="478" width="420" height="56" rx="6"></rect>
+    <text class="task-name" x="1220" y="514">DISPLAYTASK — MÀN HÌNH TFT</text>
+
+    <!-- LoRaTask -->
+    <path class="flow" d="M280 534 V560"></path>
+    <ellipse class="node start" cx="280" cy="588" rx="112" ry="28"></ellipse>
+    <text x="280" y="595">LoRaTask chạy</text>
+
+    <path class="flow" d="M280 616 V650"></path>
+    <polygon class="node decision" points="280,650 440,720 280,790 120,720"></polygon>
+    <text x="280" y="701">
+      <tspan x="280">Có frame LoRa</tspan>
+      <tspan x="280" dy="25">hoàn chỉnh?</tspan>
+    </text>
+
+    <path class="flow" d="M440 720 H475 V835 H420"></path>
+    <text class="branch" x="456" y="708">CÓ</text>
+    <polygon class="node decision" points="280,790 420,850 280,910 140,850"></polygon>
+    <text x="280" y="844">
+      <tspan x="280">Loại frame?</tspan>
+      <tspan class="small" x="280" dy="25">T / D / ACK</tspan>
+    </text>
+
+    <path class="flow" d="M280 910 V942"></path>
+    <rect class="node io" x="105" y="942" width="350" height="92" rx="5"></rect>
+    <text x="280" y="971">
+      <tspan x="280">T hoặc D: phân tích SensorData</tspan>
+      <tspan x="280" dy="25">ACK: đối chiếu sequence</tspan>
+      <tspan x="280" dy="25">và báo kết quả lệnh</tspan>
+    </text>
+
+    <path class="flow" d="M280 1034 V1067"></path>
+    <polygon class="node decision" points="280,1067 425,1127 280,1187 135,1127"></polygon>
+    <text x="280" y="1118">
+      <tspan x="280">Đang IDLE?</tspan>
+      <tspan class="small" x="280" dy="25">không chờ DATA / ACK</tspan>
+    </text>
+
+    <path class="flow" d="M280 1187 V1218"></path>
+    <rect class="node" x="95" y="1218" width="370" height="100" rx="5"></rect>
+    <text x="280" y="1248">
+      <tspan x="280">Ưu tiên lệnh từ commandQueue;</tspan>
+      <tspan x="280" dy="25">nếu không có, gửi REQ khi refresh</tspan>
+      <tspan x="280" dy="25">hoặc đến chu kỳ lấy mẫu</tspan>
+    </text>
+
+    <path class="flow" d="M280 1318 V1352"></path>
+    <path class="loop" d="M95 1268 H58 V720 H120"></path>
+    <text class="small" x="93" y="1198">CÓ</text>
+    <text class="small" x="94" y="706">KHÔNG</text>
+    <text class="small" x="72" y="1253">lặp</text>
+
+    <!-- MQTTTask -->
+    <path class="flow" d="M750 534 V560"></path>
+    <ellipse class="node start" cx="750" cy="588" rx="112" ry="28"></ellipse>
+    <text x="750" y="595">MQTTTask chạy</text>
+
+    <path class="flow" d="M750 616 V650"></path>
+    <rect class="node" x="585" y="650" width="330" height="80" rx="5"></rect>
+    <text x="750" y="681">
+      <tspan x="750">Duy trì WiFi, web server</tspan>
+      <tspan x="750" dy="25">và đồng bộ thời gian</tspan>
+    </text>
+
+    <path class="flow" d="M750 730 V758"></path>
+    <polygon class="node decision" points="750,758 890,818 750,878 610,818"></polygon>
+    <text x="750" y="811">
+      <tspan x="750">WiFi và MQTT</tspan>
+      <tspan x="750" dy="25">đã kết nối?</tspan>
+    </text>
+
+    <path class="flow" d="M750 878 V910"></path>
+    <rect class="node" x="590" y="910" width="320" height="66" rx="5"></rect>
+    <text x="750" y="950">Chạy mqttClient.loop()</text>
+
+    <path class="flow" d="M750 976 V1004"></path>
+    <polygon class="node decision" points="750,1004 900,1064 750,1124 600,1064"></polygon>
+    <text x="750" y="1057">
+      <tspan x="750">Có yêu cầu mới</tspan>
+      <tspan x="750" dy="25">từ MQTT?</tspan>
+    </text>
+
+    <path class="flow" d="M750 1124 V1155"></path>
+    <rect class="node io" x="570" y="1155" width="360" height="92" rx="5"></rect>
+    <text x="750" y="1184">
+      <tspan x="750">Refresh → yêu cầu đọc ngay</tspan>
+      <tspan x="750" dy="25">Mode / Threshold / Relay</tspan>
+      <tspan x="750" dy="25">→ đưa vào commandQueue</tspan>
+    </text>
+
+    <path class="flow" d="M750 1247 V1278"></path>
+    <rect class="node" x="560" y="1278" width="380" height="74" rx="5"></rect>
+    <text x="750" y="1308">
+      <tspan x="750">Đăng SensorData và trạng thái lệnh</tspan>
+      <tspan x="750" dy="25">lên MQTT, rồi tiếp tục vòng lặp</tspan>
+    </text>
+
+    <path class="loop" d="M940 1315 H975 V690 H915"></path>
+    <path class="loop" d="M610 818 H548 V690 H585"></path>
+    <text class="small" x="770" y="894">CÓ</text>
+    <text class="small" x="574" y="803">KHÔNG: KẾT NỐI LẠI</text>
+    <text class="small" x="770" y="1144">CÓ / KHÔNG</text>
+
+    <!-- DisplayTask -->
+    <path class="flow" d="M1220 534 V560"></path>
+    <ellipse class="node start" cx="1220" cy="588" rx="120" ry="28"></ellipse>
+    <text x="1220" y="595">DisplayTask chạy</text>
+
+    <path class="flow" d="M1220 616 V650"></path>
+    <rect class="node io" x="1050" y="650" width="340" height="80" rx="5"></rect>
+    <text x="1220" y="681">
+      <tspan x="1220">Chờ displayQueue</tspan>
+      <tspan x="1220" dy="25">tối đa 200 ms</tspan>
+    </text>
+
+    <path class="flow" d="M1220 730 V758"></path>
+    <polygon class="node decision" points="1220,758 1360,818 1220,878 1080,818"></polygon>
+    <text x="1220" y="811">
+      <tspan x="1220">Có SensorData</tspan>
+      <tspan x="1220" dy="25">mới?</tspan>
+    </text>
+
+    <path class="flow" d="M1220 878 V910"></path>
+    <rect class="node" x="1050" y="910" width="340" height="80" rx="5"></rect>
+    <text x="1220" y="941">
+      <tspan x="1220">Cập nhật snapshot mới nhất</tspan>
+      <tspan x="1220" dy="25">và thời điểm nhận dữ liệu</tspan>
+    </text>
+
+    <path class="flow" d="M1220 990 V1021"></path>
+    <rect class="node" x="1040" y="1021" width="360" height="92" rx="5"></rect>
+    <text x="1220" y="1050">
+      <tspan x="1220">Đọc trạng thái WiFi / LoRa,</tspan>
+      <tspan x="1220" dy="25">đồng hồ và kiểm tra dữ liệu cũ</tspan>
+      <tspan x="1220" dy="25">(stale)</tspan>
+    </text>
+
+    <path class="flow" d="M1220 1113 V1144"></path>
+    <rect class="node" x="1040" y="1144" width="360" height="92" rx="5"></rect>
+    <text x="1220" y="1173">
+      <tspan x="1220">Vẽ dashboard TFT:</tspan>
+      <tspan x="1220" dy="25">cảm biến, van/bơm, chế độ,</tspan>
+      <tspan x="1220" dy="25">pha tưới và pin</tspan>
+    </text>
+
+    <path class="flow" d="M1220 1236 V1267"></path>
+    <rect class="node" x="1080" y="1267" width="280" height="70" rx="5"></rect>
+    <text x="1220" y="1296">
+      <tspan x="1220">Delay ngắn 50 ms</tspan>
+      <tspan x="1220" dy="25">rồi lặp lại</tspan>
+    </text>
+
+    <path class="loop" d="M1360 1302 H1442 V690 H1390"></path>
+    <path class="flow" d="M1360 818 H1420 V1067 H1400"></path>
+    <text class="small" x="1240" y="897">CÓ</text>
+    <text class="small" x="1387" y="806">KHÔNG</text>
+
+    <!-- Trao đổi giữa các task -->
+    <path class="exchange" d="M570 1192 H465"></path>
+    <text class="queue-label" x="515" y="1177">commandQueue / refresh</text>
+
+    <path class="exchange" d="M455 1018 H520 V1268 H560"></path>
+    <text class="queue-label" x="505" y="1044">mqttDataQueue</text>
+    <text class="queue-label" x="510" y="1066">commandStatusQueue</text>
+
+    <path class="exchange" d="M455 986 H1005 V690 H1050"></path>
+    <text class="queue-label" x="978" y="674">displayQueue</text>
+
+    <path class="exchange" d="M940 1338 H1018 V1067 H1040"></path>
+    <text class="queue-label" x="984" y="1323">WiFi / MQTT status</text>
+  </svg>
+</section>

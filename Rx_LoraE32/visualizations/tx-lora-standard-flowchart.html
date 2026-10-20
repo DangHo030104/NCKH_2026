@@ -1,0 +1,204 @@
+<div id="tx-main-flowchart">
+  <style>
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+    #tx-main-flowchart {
+      color-scheme: light dark;
+      --bg: light-dark(#f8fafc, #111827);
+      --fg: light-dark(#172033, #f1f5f9);
+      --surface: light-dark(#ffffff, #1e293b);
+      --decision: light-dark(#fff7d6, #3d3a2f);
+      --io: light-dark(#e8f3ff, #26374d);
+      --terminal: light-dark(#e8faef, #1d3a2c);
+      --subprocess: light-dark(#f2ebff, #302b49);
+      --muted: light-dark(#64748b, #aab4c5);
+      width: 100%; height: 100vh; box-sizing: border-box;
+      padding: 5px 10px 9px; display: flex; flex-direction: column;
+      overflow: hidden; color: var(--fg); background: var(--bg);
+      font-family: Arial, sans-serif;
+    }
+    #tx-main-flowchart h2 { margin: 0 0 1px; text-align: center; font-size: 20px; font-weight: 500; }
+    #tx-main-flowchart .subtitle { margin: 0 0 3px; text-align: center; color: var(--muted); font-size: 12px; }
+    #tx-main-flowchart svg { display: block; width: 100%; height: 100%; min-height: 0; flex: 1 1 auto; }
+    #tx-main-flowchart .shape { fill: var(--surface); stroke: var(--fg); stroke-width: 1.6; }
+    #tx-main-flowchart .decision { fill: var(--decision); }
+    #tx-main-flowchart .io { fill: var(--io); }
+    #tx-main-flowchart .terminal { fill: var(--terminal); }
+    #tx-main-flowchart .subprocess { fill: var(--subprocess); }
+    #tx-main-flowchart .flow { fill: none; stroke: var(--fg); stroke-width: 1.55; marker-end: url(#arrow); }
+    #tx-main-flowchart .return { fill: none; stroke: var(--muted); stroke-width: 1.35; marker-end: url(#arrow-muted); }
+    #tx-main-flowchart .divider { stroke: var(--fg); stroke-width: 1.1; }
+    #tx-main-flowchart text { fill: var(--fg); font-size: 13px; font-weight: 400; text-anchor: middle; }
+    #tx-main-flowchart .edge-label { fill: var(--muted); font-size: 12px; font-weight: 500; }
+    #tx-main-flowchart .section { fill: var(--muted); font-size: 12px; font-weight: 500; letter-spacing: .8px; }
+  </style>
+
+  <h2>LƯU ĐỒ GIẢI THUẬT TX_LORAE32 — KHÔNG DÙNG FREERTOS</h2>
+  <p class="subtitle">Toàn bộ chương trình được xử lý tuần tự trong main() và vòng lặp while(1)</p>
+
+  <svg viewBox="0 0 1500 1250" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="flow-title flow-desc">
+    <title id="flow-title">Lưu đồ giải thuật Tx LoRa E32 không dùng FreeRTOS</title>
+    <desc id="flow-desc">STM32 khởi tạo phần cứng, sau đó liên tục nhận lệnh LoRa, đọc cảm biến, điều khiển tưới tự động hoặc thủ công, gửi telemetry và vào STOP khi hệ thống rảnh.</desc>
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="var(--fg)"></path></marker>
+      <marker id="arrow-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="var(--muted)"></path></marker>
+    </defs>
+
+    <text class="section" x="750" y="18">KHỞI TẠO</text>
+    <ellipse class="shape terminal" cx="750" cy="48" rx="105" ry="27"></ellipse>
+    <text x="750" y="53">BẮT ĐẦU / RESET</text>
+    <path class="flow" d="M750 75V96"></path>
+    <rect class="shape" x="600" y="96" width="300" height="55" rx="3"></rect>
+    <text x="750" y="118"><tspan x="750">Khởi tạo HAL và System Clock</tspan><tspan x="750" dy="18">GPIO · ADC · UART · TIM · RTC</tspan></text>
+    <path class="flow" d="M750 151V174"></path>
+    <rect class="shape" x="600" y="174" width="300" height="61" rx="3"></rect>
+    <text x="750" y="198"><tspan x="750">Đặt van và bơm về OFF</tspan><tspan x="750" dy="18">Khởi tạo DHT11, Battery, LoRa E32</tspan></text>
+    <path class="flow" d="M750 235V258"></path>
+    <ellipse class="shape terminal" cx="750" cy="286" rx="112" ry="28"></ellipse>
+    <text x="750" y="291">VÒNG LẶP WHILE (1)</text>
+    <path class="flow" d="M750 314V340"></path>
+
+    <polygon class="shape decision" points="750,340 890,397 750,454 610,397"></polygon>
+    <text x="750" y="393"><tspan x="750">Đã nhận đủ</tspan><tspan x="750" dy="18">frame LoRa?</tspan></text>
+
+    <path class="flow" d="M890 397H980"></path>
+    <text class="edge-label" x="934" y="386">CÓ</text>
+    <polygon class="shape io" points="998,365 1190,365 1172,429 980,429"></polygon>
+    <text x="1085" y="393"><tspan x="1085">Đọc và phân loại</tspan><tspan x="1085" dy="18">frame UART</tspan></text>
+    <path class="flow" d="M1190 397H1240"></path>
+    <polygon class="shape decision" points="1345,340 1450,397 1345,454 1240,397"></polygon>
+    <text x="1345" y="402">Loại frame?</text>
+
+    <path class="flow" d="M1345 454V490H1110"></path>
+    <text class="edge-label" x="1235" y="478">REQ</text>
+    <polygon class="shape decision" points="1015,454 1110,510 1015,566 920,510"></polygon>
+    <text x="1015" y="506"><tspan x="1015">SEQ và REQ</tspan><tspan x="1015" dy="18">hợp lệ?</tspan></text>
+    <path class="flow" d="M1015 566V592"></path>
+    <text class="edge-label" x="1038" y="581">CÓ</text>
+    <polygon class="shape io" points="938,592 1110,592 1092,657 920,657"></polygon>
+    <text x="1015" y="619"><tspan x="1015">Đọc Soil, DHT11</tspan><tspan x="1015" dy="18">và Battery</tspan></text>
+    <path class="flow" d="M1015 657V680"></path>
+    <polygon class="shape io" points="938,680 1110,680 1092,745 920,745"></polygon>
+    <text x="1015" y="707"><tspan x="1015">Gửi DATA cùng SEQ</tspan><tspan x="1015" dy="18">về ESP32</tspan></text>
+
+    <path class="flow" d="M1450 397H1470V490H1370"></path>
+    <text class="edge-label" x="1457" y="449">CMD</text>
+    <polygon class="shape decision" points="1275,454 1370,510 1275,566 1180,510"></polygon>
+    <text x="1275" y="506"><tspan x="1275">CMD và SEQ</tspan><tspan x="1275" dy="18">hợp lệ?</tspan></text>
+    <path class="flow" d="M1275 566V592"></path>
+    <text class="edge-label" x="1298" y="581">CÓ</text>
+    <polygon class="shape decision" points="1275,592 1370,648 1275,704 1180,648"></polygon>
+    <text x="1275" y="644"><tspan x="1275">Lệnh đã được</tspan><tspan x="1275" dy="18">thực thi?</tspan></text>
+    <path class="flow" d="M1370 648H1413V724"></path>
+    <text class="edge-label" x="1393" y="637">CÓ</text>
+    <polygon class="shape io" points="1343,724 1470,724 1455,781 1328,781"></polygon>
+    <text x="1399" y="757">Gửi lại ACK</text>
+    <path class="flow" d="M1275 704V728"></path>
+    <text class="edge-label" x="1300" y="718">KHÔNG</text>
+    <rect class="shape subprocess" x="1165" y="728" width="220" height="70" rx="3"></rect>
+    <line class="divider" x1="1180" y1="728" x2="1180" y2="798"></line>
+    <line class="divider" x1="1370" y1="728" x2="1370" y2="798"></line>
+    <text x="1275" y="755"><tspan x="1275">Thực thi trực tiếp:</tspan><tspan x="1275" dy="18">MODE · THRESHOLD · ZONE</tspan></text>
+    <path class="flow" d="M1275 798V818"></path>
+    <polygon class="shape decision" points="1275,818 1362,866 1275,914 1188,866"></polygon>
+    <text x="1275" y="862"><tspan x="1275">Thực thi</tspan><tspan x="1275" dy="18">thành công?</tspan></text>
+    <path class="flow" d="M1362 866H1413V900"></path>
+    <text class="edge-label" x="1388" y="855">CÓ</text>
+    <polygon class="shape io" points="1343,900 1470,900 1455,957 1328,957"></polygon>
+    <text x="1399" y="924"><tspan x="1399">Lưu CMD</tspan><tspan x="1399" dy="18">và gửi ACK</tspan></text>
+
+    <path class="flow" d="M750 454V488"></path>
+    <text class="edge-label" x="782" y="475">KHÔNG</text>
+    <rect class="shape" x="625" y="488" width="250" height="60" rx="3"></rect>
+    <text x="750" y="513"><tspan x="750">Kiểm tra an toàn MANUAL</tspan><tspan x="750" dy="18">Quá 60 giây → tắt tưới</tspan></text>
+    <path class="flow" d="M750 548V575"></path>
+    <polygon class="shape decision" points="750,575 870,628 750,681 630,628"></polygon>
+    <text x="750" y="624"><tspan x="750">Đang ở chế độ</tspan><tspan x="750" dy="18">AUTO?</tspan></text>
+
+    <path class="flow" d="M630 628H520"></path>
+    <text class="edge-label" x="578" y="617">CÓ</text>
+    <polygon class="shape decision" points="420,575 520,628 420,681 320,628"></polygon>
+    <text x="420" y="624"><tspan x="420">Sensor hợp lệ</tspan><tspan x="420" dy="18">và còn mới?</tspan></text>
+    <path class="flow" d="M420 575V520H280"></path>
+    <text class="edge-label" x="370" y="548">KHÔNG</text>
+    <polygon class="shape io" points="112,488 296,488 280,552 96,552"></polygon>
+    <text x="196" y="515"><tspan x="196">Đọc lại toàn bộ</tspan><tspan x="196" dy="18">cảm biến</tspan></text>
+    <path class="flow" d="M196 552V628H320"></path>
+    <path class="flow" d="M420 681V708"></path>
+    <text class="edge-label" x="443" y="697">CÓ</text>
+    <polygon class="shape decision" points="420,708 530,766 420,824 310,766"></polygon>
+    <text x="420" y="762"><tspan x="420">Trạng thái</tspan><tspan x="420" dy="18">AUTO FSM?</tspan></text>
+
+    <path class="flow" d="M310 766H224V708"></path>
+    <text class="edge-label" x="268" y="754">IDLE</text>
+    <polygon class="shape decision" points="132,650 224,708 132,766 40,708"></polygon>
+    <text x="132" y="704"><tspan x="132">Có Zone dưới</tspan><tspan x="132" dy="18">ngưỡng START?</tspan></text>
+    <path class="flow" d="M132 766V796"></path>
+    <text class="edge-label" x="155" y="785">CÓ</text>
+    <rect class="shape" x="42" y="796" width="180" height="70" rx="3"></rect>
+    <text x="132" y="823"><tspan x="132">Chọn Zone khô hơn</tspan><tspan x="132" dy="18">Mở van và bật bơm</tspan></text>
+
+    <path class="flow" d="M420 824V850"></path>
+    <text class="edge-label" x="463" y="839">WATERING</text>
+    <rect class="shape" x="330" y="850" width="180" height="64" rx="3"></rect>
+    <text x="420" y="877"><tspan x="420">Đủ 5 giây → tắt bơm</tspan><tspan x="420" dy="18">Chuyển sang SOAK</tspan></text>
+    <path class="flow" d="M530 766H596V850"></path>
+    <text class="edge-label" x="565" y="754">SOAK</text>
+    <rect class="shape" x="515" y="850" width="184" height="64" rx="3"></rect>
+    <text x="607" y="877"><tspan x="607">Đủ 10 giây → đọc sensor</tspan><tspan x="607" dy="18">Chuyển sang MEASURE</tspan></text>
+    <path class="flow" d="M420 914V944H300"></path>
+    <path class="flow" d="M607 914V944H540"></path>
+    <polygon class="shape decision" points="420,926 540,986 420,1046 300,986"></polygon>
+    <text x="420" y="982"><tspan x="420">Độ ẩm đạt STOP</tspan><tspan x="420" dy="18">hoặc đủ 10 chu kỳ?</tspan></text>
+    <path class="flow" d="M300 986H222V936"></path>
+    <text class="edge-label" x="258" y="974">CHƯA</text>
+    <rect class="shape" x="42" y="904" width="180" height="64" rx="3"></rect>
+    <text x="132" y="931"><tspan x="132">Tăng chu kỳ</tspan><tspan x="132" dy="18">Tưới lại Zone</tspan></text>
+    <path class="return" d="M42 936H18V831H42"></path>
+    <path class="flow" d="M420 1046V1068"></path>
+    <rect class="shape" x="320" y="1068" width="200" height="62" rx="3"></rect>
+    <text x="420" y="1094"><tspan x="420">Đạt STOP → IDLE</tspan><tspan x="420" dy="18">Đủ 10 chu kỳ → FAILED</tspan></text>
+
+    <path class="flow" d="M870 628H910V755"></path>
+    <text class="edge-label" x="891" y="617">KHÔNG</text>
+    <path class="flow" d="M750 681V755"></path>
+    <path class="return" d="M520 1099H750V815"></path>
+    <polygon class="shape decision" points="750,755 850,805 750,855 650,805"></polygon>
+    <text x="750" y="801"><tspan x="750">Đến lúc gửi</tspan><tspan x="750" dy="18">Telemetry?</tspan></text>
+    <path class="flow" d="M850 805H940"></path>
+    <text class="edge-label" x="894" y="794">CÓ</text>
+    <polygon class="shape io" points="956,772 1140,772 1124,838 940,838"></polygon>
+    <text x="1040" y="799"><tspan x="1040">Đọc sensor và gửi</tspan><tspan x="1040" dy="18">Telemetry về ESP32</tspan></text>
+    <path class="return" d="M1040 838V882H750"></path>
+    <path class="flow" d="M750 855V882"></path>
+    <text class="edge-label" x="778" y="870">KHÔNG</text>
+
+    <polygon class="shape decision" points="750,882 860,937 750,992 640,937"></polygon>
+    <text x="750" y="933"><tspan x="750">Hệ thống có thể</tspan><tspan x="750" dy="18">vào STOP?</tspan></text>
+    <path class="return" d="M640 937H570V286H638"></path>
+    <text class="edge-label" x="604" y="926">KHÔNG</text>
+    <path class="flow" d="M750 992V1015"></path>
+    <text class="edge-label" x="773" y="1007">CÓ</text>
+    <rect class="shape" x="635" y="1015" width="230" height="58" rx="3"></rect>
+    <text x="750" y="1039"><tspan x="750">E32 Power-Saving</tspan><tspan x="750" dy="18">Đặt hoặc hủy RTC Alarm</tspan></text>
+    <path class="flow" d="M750 1073V1094"></path>
+    <ellipse class="shape terminal" cx="750" cy="1122" rx="116" ry="28"></ellipse>
+    <text x="750" y="1127">STM32 VÀO STOP</text>
+    <path class="flow" d="M750 1150V1170"></path>
+    <polygon class="shape decision" points="750,1170 840,1209 750,1248 660,1209"></polygon>
+    <text x="750" y="1214">Nguồn Wake?</text>
+    <path class="return" d="M660 1209H570V1135H250V552"></path>
+    <text class="edge-label" x="612" y="1198">RTC</text>
+    <path class="return" d="M840 1209H920V1122H1190V429"></path>
+    <text class="edge-label" x="884" y="1198">LORA AUX</text>
+
+    <path class="return" d="M920 510H890V286H862"></path>
+    <text class="edge-label" x="904" y="497">KHÔNG</text>
+    <path class="return" d="M1180 510H1150V286H862"></path>
+    <text class="edge-label" x="1165" y="497">KHÔNG</text>
+    <path class="return" d="M920 712H900V286H862"></path>
+    <path class="return" d="M1413 781V1000H900V286H862"></path>
+    <path class="return" d="M1399 957V1000"></path>
+    <path class="return" d="M1188 866H900"></path>
+    <text class="edge-label" x="1145" y="855">KHÔNG</text>
+  </svg>
+</div>

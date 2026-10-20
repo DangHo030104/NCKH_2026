@@ -1,0 +1,117 @@
+<div id="auto-irrigation-flow" style="width:100%; color:var(--foreground);">
+  <h2 style="text-align:center; margin:0 0 12px;">Lưu đồ điều khiển tưới tự động</h2>
+  <svg viewBox="0 0 720 1620" width="100%" role="img" aria-labelledby="flow-title flow-desc" style="display:block; max-width:720px; margin:0 auto;">
+    <title id="flow-title">Lưu đồ giải thuật điều khiển tưới tự động</title>
+    <desc id="flow-desc">Lưu đồ dùng elip cho bắt đầu và kết thúc, hình bình hành cho dữ liệu vào ra, hình chữ nhật cho xử lý và hình thoi cho điều kiện.</desc>
+    <defs>
+      <marker id="flow-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L0,6 L9,3 z" fill="var(--foreground)"/>
+      </marker>
+      <style>
+        #auto-irrigation-flow .shape { stroke: var(--foreground); stroke-width: 2; }
+        #auto-irrigation-flow .terminal { fill: color-mix(in srgb, var(--viz-series-1) 18%, var(--background)); }
+        #auto-irrigation-flow .process { fill: var(--card); }
+        #auto-irrigation-flow .decision { fill: color-mix(in srgb, var(--yellow) 18%, var(--background)); }
+        #auto-irrigation-flow .io { fill: color-mix(in srgb, var(--blue) 16%, var(--background)); }
+        #auto-irrigation-flow .failure { fill: color-mix(in srgb, var(--red) 16%, var(--background)); }
+        #auto-irrigation-flow .line { fill: none; stroke: var(--foreground); stroke-width: 2; marker-end: url(#flow-arrow); }
+        #auto-irrigation-flow text { fill: var(--foreground); font-family: sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: middle; }
+        #auto-irrigation-flow .branch { font-size: 13px; font-weight: 500; paint-order: stroke; stroke: var(--background); stroke-width: 4px; stroke-linejoin: round; }
+      </style>
+    </defs>
+
+    <!-- Bắt đầu: elip -->
+    <ellipse class="shape terminal" cx="360" cy="42" rx="92" ry="30"/>
+    <text x="360" y="42">BẮT ĐẦU</text>
+    <path class="line" d="M360 72 V105"/>
+
+    <!-- Xử lý: chữ nhật -->
+    <rect class="shape process" x="235" y="108" width="250" height="58" rx="2"/>
+    <text x="360" y="137">Khởi tạo chế độ AUTO</text>
+    <path class="line" d="M360 166 V205"/>
+
+    <!-- Vào/ra: bình hành -->
+    <polygon class="shape io" points="225,208 505,208 475,274 195,274"/>
+    <text x="350" y="233"><tspan x="350" dy="0">Đọc độ ẩm đất</tspan><tspan x="350" dy="20">vùng 1 và vùng 2</tspan></text>
+    <path class="line" d="M350 274 V318"/>
+
+    <!-- Điều kiện: hình thoi -->
+    <polygon class="shape decision" points="350,320 492,385 350,450 208,385"/>
+    <text x="350" y="375"><tspan x="350" dy="0">Dữ liệu cảm biến</tspan><tspan x="350" dy="20">hợp lệ?</tspan></text>
+
+    <!-- Nhánh không hợp lệ -->
+    <path class="line" d="M208 385 H183 V314 H168"/>
+    <text class="branch" x="153" y="370">Không</text>
+    <rect class="shape process" x="18" y="285" width="150" height="58" rx="2"/>
+    <text x="93" y="304"><tspan x="93" dy="0">Yêu cầu đọc lại</tspan><tspan x="93" dy="20">cảm biến</tspan></text>
+    <path class="line" d="M93 285 V240 H194"/>
+
+    <!-- Nhánh hợp lệ -->
+    <path class="line" d="M350 450 V493"/>
+    <text class="branch" x="379" y="468">Có</text>
+    <polygon class="shape decision" points="350,495 510,570 350,645 190,570"/>
+    <text x="350" y="550"><tspan x="350" dy="0">Có vùng nào dưới</tspan><tspan x="350" dy="20">ngưỡng START?</tspan></text>
+
+    <!-- Không khô: IDLE và lặp đo -->
+    <path class="line" d="M190 570 H88 V688"/>
+    <text class="branch" x="145" y="555">Không</text>
+    <rect class="shape process" x="18" y="690" width="180" height="66" rx="2"/>
+    <text x="108" y="713"><tspan x="108" dy="0">Tắt bơm, đóng van</tspan><tspan x="108" dy="20">và chờ chu kỳ mới</tspan></text>
+    <path class="line" d="M108 756 V800 H55 V241 H194"/>
+
+    <!-- Có vùng khô -->
+    <path class="line" d="M350 645 V688"/>
+    <text class="branch" x="378" y="662">Có</text>
+    <rect class="shape process" x="230" y="690" width="240" height="66" rx="2"/>
+    <text x="350" y="713"><tspan x="350" dy="0">Chọn vùng khô hơn</tspan><tspan x="350" dy="20">nếu cả hai vùng cùng khô</tspan></text>
+    <path class="line" d="M350 756 V790"/>
+
+    <rect class="shape process" x="230" y="792" width="240" height="66" rx="2"/>
+    <text x="350" y="815"><tspan x="350" dy="0">Mở van vùng được chọn</tspan><tspan x="350" dy="20">và bật bơm</tspan></text>
+    <path class="line" d="M350 858 V895"/>
+
+    <rect class="shape process" x="230" y="898" width="240" height="58" rx="2"/>
+    <text x="350" y="927">Tưới trong 5 giây</text>
+    <path class="line" d="M350 956 V990"/>
+
+    <rect class="shape process" x="230" y="992" width="240" height="66" rx="2"/>
+    <text x="350" y="1015"><tspan x="350" dy="0">Tắt bơm, đóng van</tspan><tspan x="350" dy="20">và chờ thấm 10 giây</tspan></text>
+    <path class="line" d="M350 1058 V1095"/>
+
+    <polygon class="shape io" points="225,1098 505,1098 475,1164 195,1164"/>
+    <text x="350" y="1122"><tspan x="350" dy="0">Đo lại độ ẩm</tspan><tspan x="350" dy="20">vùng vừa tưới</tspan></text>
+    <path class="line" d="M350 1164 V1200"/>
+
+    <polygon class="shape decision" points="350,1202 500,1272 350,1342 200,1272"/>
+    <text x="350" y="1262"><tspan x="350" dy="0">Độ ẩm ≥</tspan><tspan x="350" dy="20">ngưỡng STOP?</tspan></text>
+
+    <!-- Thành công -->
+    <path class="line" d="M500 1272 H595 V1370"/>
+    <text class="branch" x="548" y="1257">Có</text>
+    <rect class="shape process" x="510" y="1372" width="190" height="66" rx="2"/>
+    <text x="605" y="1395"><tspan x="605" dy="0">Xóa bộ đếm</tspan><tspan x="605" dy="20">và trở về IDLE</tspan></text>
+    <path class="line" d="M605 1438 V1480"/>
+    <ellipse class="shape terminal" cx="605" cy="1515" rx="95" ry="32"/>
+    <text x="605" y="1515">HOÀN THÀNH</text>
+
+    <!-- Chưa đủ ẩm -->
+    <path class="line" d="M350 1342 V1370"/>
+    <text class="branch" x="382" y="1355">Không</text>
+    <rect class="shape process" x="250" y="1372" width="200" height="58" rx="2"/>
+    <text x="350" y="1401">Tăng số chu kỳ tưới</text>
+    <path class="line" d="M350 1430 V1460"/>
+    <polygon class="shape decision" points="350,1462 465,1515 350,1568 235,1515"/>
+    <text x="350" y="1505"><tspan x="350" dy="0">Đã đủ</tspan><tspan x="350" dy="20">10 chu kỳ?</tspan></text>
+
+    <!-- Lặp tưới -->
+    <path class="line" d="M235 1515 H165 V825 H228"/>
+    <text class="branch" x="198" y="1500">Chưa</text>
+
+    <!-- Thất bại -->
+    <path class="line" d="M465 1515 H505"/>
+    <text class="branch" x="483" y="1500">Đủ</text>
+    <ellipse class="shape failure" cx="590" cy="1580" rx="110" ry="30"/>
+    <path class="line" d="M505 1515 H590 V1548"/>
+    <text x="590" y="1580">FAILED — DỪNG TƯỚI</text>
+  </svg>
+</div>

@@ -1,0 +1,133 @@
+<div id="lora-task-simple">
+  <style>
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+    #lora-task-simple {
+      color-scheme: light dark;
+      --bg: light-dark(#f8fafc, #101827);
+      --fg: light-dark(#172033, #f1f5f9);
+      --surface: light-dark(#ffffff, #1e293b);
+      --decision: light-dark(#fff5c7, #403b2b);
+      --io: light-dark(#e6f3ff, #26394f);
+      --terminal: light-dark(#e5f8ec, #1c392b);
+      --signal: light-dark(#f2ebff, #302b49);
+      --muted: light-dark(#64748b, #aab4c5);
+      width: 100%; height: 100vh; box-sizing: border-box;
+      padding: 8px 12px 12px; display: flex; flex-direction: column;
+      color: var(--fg); background: var(--bg); font-family: Arial, sans-serif;
+    }
+    #lora-task-simple h2 { margin: 0 0 2px; text-align: center; font-size: 21px; font-weight: 500; }
+    #lora-task-simple p { margin: 0 0 5px; text-align: center; color: var(--muted); font-size: 12px; }
+    #lora-task-simple svg { display: block; width: 100%; height: 100%; min-height: 0; flex: 1 1 auto; }
+    #lora-task-simple .shape { fill: var(--surface); stroke: var(--fg); stroke-width: 1.7; }
+    #lora-task-simple .decision { fill: var(--decision); }
+    #lora-task-simple .io { fill: var(--io); }
+    #lora-task-simple .terminal { fill: var(--terminal); }
+    #lora-task-simple .signal-box { fill: var(--signal); }
+    #lora-task-simple .flow { fill: none; stroke: var(--fg); stroke-width: 1.6; marker-end: url(#lt-arrow); }
+    #lora-task-simple .return { fill: none; stroke: var(--muted); stroke-width: 1.4; marker-end: url(#lt-muted-arrow); }
+    #lora-task-simple text { fill: var(--fg); font-size: 14px; font-weight: 400; text-anchor: middle; }
+    #lora-task-simple .label { fill: var(--muted); font-size: 12px; font-weight: 500; }
+  </style>
+
+  <h2>LƯU ĐỒ ĐƠN GIẢN — LORATASK</h2>
+  <p>Tx_LoraE32 sử dụng FreeRTOS</p>
+
+  <svg viewBox="0 0 1300 900" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="lt-title lt-desc">
+    <title id="lt-title">Lưu đồ đơn giản của LoRaTask</title>
+    <desc id="lt-desc">LoRaTask ưu tiên xử lý frame LoRa, sau đó phục vụ telemetry và đưa STM32 vào STOP nếu hệ thống rảnh.</desc>
+    <defs>
+      <marker id="lt-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="var(--fg)"></path></marker>
+      <marker id="lt-muted-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="var(--muted)"></path></marker>
+    </defs>
+
+    <ellipse class="shape terminal" cx="650" cy="42" rx="115" ry="28"></ellipse>
+    <text x="650" y="47">LORATASK BẮT ĐẦU</text>
+    <path class="flow" d="M650 70V92"></path>
+
+    <ellipse class="shape terminal" cx="650" cy="120" rx="105" ry="28"></ellipse>
+    <text x="650" y="125">VÒNG LẶP TASK</text>
+    <path class="flow" d="M650 148V176"></path>
+
+    <polygon class="shape decision" points="650,176 795,238 650,300 505,238"></polygon>
+    <text x="650" y="234"><tspan x="650">Có frame LoRa</tspan><tspan x="650" dy="19">hoàn chỉnh?</tspan></text>
+
+    <!-- Frame branch -->
+    <path class="flow" d="M795 238H895"></path>
+    <text class="label" x="845" y="226">CÓ</text>
+    <polygon class="shape io" points="915,205 1115,205 1095,271 895,271"></polygon>
+    <text x="1005" y="233"><tspan x="1005">Đọc và phân loại</tspan><tspan x="1005" dy="19">frame nhận được</tspan></text>
+    <path class="flow" d="M1115 238H1155"></path>
+
+    <polygon class="shape decision" points="1220,190 1285,238 1220,286 1155,238"></polygon>
+    <text x="1220" y="243">Loại?</text>
+
+    <!-- REQ -->
+    <path class="flow" d="M1220 286V326H1045"></path>
+    <text class="label" x="1135" y="314">REQ</text>
+    <rect class="shape signal-box" x="900" y="326" width="290" height="72" rx="3"></rect>
+    <text x="1045" y="354"><tspan x="1045">Yêu cầu SensorTask đọc sensor</tspan><tspan x="1045" dy="19">Chờ SENSOR_READY tối đa 2 giây</tspan></text>
+    <path class="flow" d="M1045 398V423"></path>
+    <polygon class="shape decision" points="1045,423 1145,472 1045,521 945,472"></polygon>
+    <text x="1045" y="468"><tspan x="1045">Có dữ liệu</tspan><tspan x="1045" dy="19">sensor?</tspan></text>
+    <path class="flow" d="M1045 521V546"></path>
+    <text class="label" x="1070" y="537">CÓ</text>
+    <polygon class="shape io" points="960,546 1145,546 1130,606 945,606"></polygon>
+    <text x="1045" y="571"><tspan x="1045">Gửi DATA</tspan><tspan x="1045" dy="19">cùng SEQ</tspan></text>
+
+    <!-- CMD -->
+    <path class="flow" d="M1285 238H1292V326H1265"></path>
+    <text class="label" x="1280" y="302">CMD</text>
+    <rect class="shape signal-box" x="1190" y="326" width="100" height="72" rx="3"></rect>
+    <text x="1240" y="354"><tspan x="1240">Yêu cầu</tspan><tspan x="1240" dy="19">IrrigationTask</tspan></text>
+    <path class="flow" d="M1240 398V423"></path>
+    <polygon class="shape decision" points="1240,423 1295,472 1240,521 1185,472"></polygon>
+    <text x="1240" y="468"><tspan x="1240">Thành</tspan><tspan x="1240" dy="19">công?</tspan></text>
+    <path class="flow" d="M1240 521V546"></path>
+    <text class="label" x="1262" y="537">CÓ</text>
+    <polygon class="shape io" points="1197,546 1292,546 1280,606 1185,606"></polygon>
+    <text x="1238" y="581">Gửi ACK</text>
+
+    <!-- No frame / telemetry -->
+    <path class="flow" d="M650 300V330"></path>
+    <text class="label" x="682" y="318">KHÔNG</text>
+    <rect class="shape" x="525" y="330" width="250" height="62" rx="3"></rect>
+    <text x="650" y="356"><tspan x="650">Phục vụ Live Telemetry</tspan><tspan x="650" dy="19">nếu có dữ liệu mới</tspan></text>
+    <path class="flow" d="M650 392V422"></path>
+
+    <polygon class="shape decision" points="650,422 790,482 650,542 510,482"></polygon>
+    <text x="650" y="478"><tspan x="650">Hệ thống đủ điều kiện</tspan><tspan x="650" dy="19">vào STOP?</tspan></text>
+
+    <path class="return" d="M510 482H430V120H545"></path>
+    <text class="label" x="470" y="470">KHÔNG</text>
+
+    <path class="flow" d="M650 542V570"></path>
+    <text class="label" x="677" y="559">CÓ</text>
+    <rect class="shape" x="520" y="570" width="260" height="66" rx="3"></rect>
+    <text x="650" y="597"><tspan x="650">Chuyển E32 sang Power-Saving</tspan><tspan x="650" dy="19">Đặt RTC Alarm nếu cần</tspan></text>
+    <path class="flow" d="M650 636V662"></path>
+
+    <ellipse class="shape terminal" cx="650" cy="690" rx="120" ry="28"></ellipse>
+    <text x="650" y="695">STM32 VÀO STOP</text>
+    <path class="flow" d="M650 718V744"></path>
+
+    <polygon class="shape decision" points="650,744 755,796 650,848 545,796"></polygon>
+    <text x="650" y="792"><tspan x="650">Nguồn đánh thức:</tspan><tspan x="650" dy="19">RTC hay LoRa AUX?</tspan></text>
+
+    <path class="return" d="M545 796H410V650H275"></path>
+    <text class="label" x="475" y="784">RTC</text>
+    <rect class="shape" x="75" y="615" width="200" height="70" rx="3"></rect>
+    <text x="175" y="643"><tspan x="175">Yêu cầu đo sensor</tspan><tspan x="175" dy="19">cho AUTO FSM</tspan></text>
+    <path class="return" d="M175 615V120H545"></path>
+
+    <path class="return" d="M755 796H890V685H1045V606"></path>
+    <text class="label" x="820" y="784">LORA AUX</text>
+
+    <!-- Return paths -->
+    <path class="return" d="M945 472H850V120H755"></path>
+    <text class="label" x="900" y="460">KHÔNG</text>
+    <path class="return" d="M1045 606V650H850V120H755"></path>
+    <path class="return" d="M1185 472H1160V650H850"></path>
+    <text class="label" x="1172" y="460">KHÔNG</text>
+    <path class="return" d="M1238 606V650H1160"></path>
+  </svg>
+</div>

@@ -1,0 +1,234 @@
+<div id="tx-freertos-flowchart">
+  <style>
+    html, body { margin: 0; width: 100%; min-height: 100%; overflow: auto; }
+    #tx-freertos-flowchart {
+      color-scheme: light dark;
+      --bg: light-dark(#f8fafc, #101827);
+      --fg: light-dark(#162033, #f1f5f9);
+      --surface: light-dark(#ffffff, #1e293b);
+      --lane: light-dark(#eef2f7, #172033);
+      --decision: light-dark(#fff6cf, #403c2c);
+      --io: light-dark(#e7f3ff, #26384e);
+      --terminal: light-dark(#e5f8ec, #1d392b);
+      --signal: light-dark(#7c3aed, #c4b5fd);
+      --muted: light-dark(#64748b, #aab4c5);
+      width: 100%; min-height: 100vh; box-sizing: border-box;
+      padding: 8px 14px 18px; display: flex; flex-direction: column;
+      overflow: auto; color: var(--fg); background: var(--bg);
+      font-family: Arial, sans-serif;
+    }
+    #tx-freertos-flowchart h2 { margin: 0 0 1px; text-align: center; font-size: 20px; font-weight: 500; }
+    #tx-freertos-flowchart .subtitle { margin: 0 0 3px; text-align: center; color: var(--muted); font-size: 12px; }
+    #tx-freertos-flowchart svg {
+      display: block;
+      width: 1900px;
+      height: auto;
+      max-width: none;
+      flex: 0 0 auto;
+      margin: 4px auto 0;
+    }
+    #tx-freertos-flowchart .lane { fill: none; stroke: var(--muted); stroke-width: 1.1; }
+    #tx-freertos-flowchart .lane-head { fill: var(--lane); stroke: var(--muted); stroke-width: 1.1; }
+    #tx-freertos-flowchart .shape { fill: var(--surface); stroke: var(--fg); stroke-width: 1.45; }
+    #tx-freertos-flowchart .decision { fill: var(--decision); }
+    #tx-freertos-flowchart .io { fill: var(--io); }
+    #tx-freertos-flowchart .terminal { fill: var(--terminal); }
+    #tx-freertos-flowchart .flow { fill: none; stroke: var(--fg); stroke-width: 1.45; marker-end: url(#fr-arrow); }
+    #tx-freertos-flowchart .return { fill: none; stroke: var(--muted); stroke-width: 1.25; marker-end: url(#fr-muted-arrow); }
+    #tx-freertos-flowchart .signal { fill: none; stroke: var(--signal); stroke-width: 1.45; stroke-dasharray: 7 5; marker-end: url(#fr-signal-arrow); }
+    #tx-freertos-flowchart text { fill: var(--fg); font-size: 13px; font-weight: 400; text-anchor: middle; }
+    #tx-freertos-flowchart .head-text { font-size: 15px; font-weight: 500; }
+    #tx-freertos-flowchart .edge-label { fill: var(--muted); font-size: 11px; font-weight: 500; }
+    #tx-freertos-flowchart .signal-label { fill: var(--signal); font-size: 11px; font-weight: 500; }
+  </style>
+
+  <h2>LƯU ĐỒ GIẢI THUẬT TX_LORAE32 — FREERTOS</h2>
+  <p class="subtitle">Ba task chạy đồng thời; đường nét đứt biểu diễn Thread Flag trao đổi giữa các task</p>
+
+  <svg viewBox="0 0 1600 950" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="fr-title fr-desc">
+    <title id="fr-title">Lưu đồ FreeRTOS của Tx LoRa E32</title>
+    <desc id="fr-desc">Sau khi khởi tạo FreeRTOS, LoRaTask, SensorTask và IrrigationTask chạy song song và trao đổi bằng thread flags.</desc>
+    <defs>
+      <marker id="fr-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="var(--fg)"></path></marker>
+      <marker id="fr-muted-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="var(--muted)"></path></marker>
+      <marker id="fr-signal-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="var(--signal)"></path></marker>
+    </defs>
+
+    <!-- Startup -->
+    <ellipse class="shape terminal" cx="800" cy="31" rx="100" ry="24"></ellipse>
+    <text x="800" y="36">BẮT ĐẦU / RESET</text>
+    <path class="flow" d="M800 55V68"></path>
+    <rect class="shape" x="630" y="68" width="340" height="50" rx="3"></rect>
+    <text x="800" y="88"><tspan x="800">Khởi tạo HAL, Clock và ngoại vi</tspan><tspan x="800" dy="17">Relay OFF · Sensor · LoRa E32</tspan></text>
+    <path class="flow" d="M800 118V131"></path>
+    <rect class="shape" x="630" y="131" width="340" height="50" rx="3"></rect>
+    <text x="800" y="151"><tspan x="800">Khởi tạo Kernel và tạo 3 Task</tspan><tspan x="800" dy="17">Sau đó gọi osKernelStart()</tspan></text>
+
+    <!-- Fork -->
+    <path class="flow" d="M800 181V194"></path>
+    <rect x="250" y="194" width="1100" height="8" fill="var(--fg)"></rect>
+    <path class="flow" d="M270 202V232"></path>
+    <path class="flow" d="M800 202V232"></path>
+    <path class="flow" d="M1330 202V232"></path>
+
+    <!-- Swimlanes -->
+    <rect class="lane" x="20" y="220" width="500" height="710" rx="4"></rect>
+    <rect class="lane-head" x="20" y="220" width="500" height="45" rx="4"></rect>
+    <text class="head-text" x="270" y="248">LORATASK — Truyền thông và Low Power</text>
+
+    <rect class="lane" x="550" y="220" width="500" height="710" rx="4"></rect>
+    <rect class="lane-head" x="550" y="220" width="500" height="45" rx="4"></rect>
+    <text class="head-text" x="800" y="248">SENSORTASK — Đọc cảm biến</text>
+
+    <rect class="lane" x="1080" y="220" width="500" height="710" rx="4"></rect>
+    <rect class="lane-head" x="1080" y="220" width="500" height="45" rx="4"></rect>
+    <text class="head-text" x="1330" y="248">IRRIGATIONTASK — Điều khiển tưới</text>
+
+    <!-- LoRaTask -->
+    <ellipse class="shape terminal" cx="270" cy="291" rx="94" ry="23"></ellipse>
+    <text x="270" y="296">LoRaTask chạy</text>
+    <path class="flow" d="M270 314V330"></path>
+    <polygon class="shape decision" points="270,330 382,380 270,430 158,380"></polygon>
+    <text x="270" y="376"><tspan x="270">Có frame LoRa</tspan><tspan x="270" dy="17">hoàn chỉnh?</tspan></text>
+
+    <path class="flow" d="M382 380H435V448"></path>
+    <text class="edge-label" x="410" y="369">CÓ</text>
+    <polygon class="shape io" points="347,448 500,448 486,504 333,504"></polygon>
+    <text x="416" y="472"><tspan x="416">Đọc và phân loại</tspan><tspan x="416" dy="17">REQ hoặc CMD</tspan></text>
+    <path class="flow" d="M416 504V520"></path>
+    <polygon class="shape decision" points="416,520 498,565 416,610 334,565"></polygon>
+    <text x="416" y="570">Loại frame?</text>
+
+    <path class="flow" d="M334 565H270V630"></path>
+    <text class="edge-label" x="302" y="554">REQ</text>
+    <rect class="shape" x="165" y="630" width="210" height="58" rx="3"></rect>
+    <text x="270" y="654"><tspan x="270">Set SENSOR_READ_SIGNAL</tspan><tspan x="270" dy="17">Chờ SENSOR_READY</tspan></text>
+    <path class="flow" d="M270 688V706"></path>
+    <polygon class="shape io" points="190,706 364,706 350,761 176,761"></polygon>
+    <text x="270" y="730"><tspan x="270">Gửi DATA</tspan><tspan x="270" dy="17">cùng SEQ</tspan></text>
+
+    <path class="flow" d="M498 565H506V630H450"></path>
+    <text class="edge-label" x="502" y="554">CMD</text>
+    <rect class="shape" x="350" y="630" width="150" height="58" rx="3"></rect>
+    <text x="425" y="654"><tspan x="425">Set CONTROL_EXEC</tspan><tspan x="425" dy="17">Chờ kết quả</tspan></text>
+    <path class="flow" d="M425 688V706"></path>
+    <polygon class="shape io" points="366,706 500,706 486,761 352,761"></polygon>
+    <text x="426" y="730"><tspan x="426">Thành công:</tspan><tspan x="426" dy="17">Gửi ACK</tspan></text>
+
+    <path class="flow" d="M270 430V448"></path>
+    <text class="edge-label" x="296" y="443">KHÔNG</text>
+    <rect class="shape" x="75" y="448" width="210" height="56" rx="3"></rect>
+    <text x="180" y="472"><tspan x="180">TelemetryManager</tspan><tspan x="180" dy="17">Service</tspan></text>
+    <path class="flow" d="M180 504V530"></path>
+    <polygon class="shape decision" points="180,530 272,575 180,620 88,575"></polygon>
+    <text x="180" y="571"><tspan x="180">Có thể vào</tspan><tspan x="180" dy="17">STOP?</tspan></text>
+    <path class="flow" d="M180 620V640"></path>
+    <text class="edge-label" x="204" y="633">CÓ</text>
+    <rect class="shape" x="70" y="640" width="220" height="58" rx="3"></rect>
+    <text x="180" y="664"><tspan x="180">E32 Power-Saving</tspan><tspan x="180" dy="17">Đặt RTC Alarm</tspan></text>
+    <path class="flow" d="M180 698V718"></path>
+    <ellipse class="shape terminal" cx="180" cy="743" rx="92" ry="25"></ellipse>
+    <text x="180" y="748">STM32 STOP</text>
+    <path class="flow" d="M180 768V786"></path>
+    <polygon class="shape decision" points="180,786 266,830 180,874 94,830"></polygon>
+    <text x="180" y="835">RTC / LoRa?</text>
+    <path class="return" d="M94 830H48V380H158"></path>
+    <text class="edge-label" x="69" y="818">RTC</text>
+    <path class="return" d="M266 830H515V380H382"></path>
+    <text class="edge-label" x="291" y="818">LORA</text>
+    <path class="return" d="M88 575H45V380H158"></path>
+    <text class="edge-label" x="65" y="563">KHÔNG</text>
+    <path class="return" d="M270 761V902H270V430"></path>
+    <path class="return" d="M426 761V902H270"></path>
+
+    <!-- SensorTask -->
+    <ellipse class="shape terminal" cx="800" cy="291" rx="94" ry="23"></ellipse>
+    <text x="800" y="296">SensorTask chạy</text>
+    <path class="flow" d="M800 314V334"></path>
+    <polygon class="shape decision" points="800,334 922,386 800,438 678,386"></polygon>
+    <text x="800" y="382"><tspan x="800">Chờ Thread Flag</tspan><tspan x="800" dy="17">đọc cảm biến</tspan></text>
+    <path class="flow" d="M800 438V458"></path>
+    <polygon class="shape io" points="704,458 910,458 896,516 690,516"></polygon>
+    <text x="800" y="483"><tspan x="800">Đọc Soil 1, Soil 2</tspan><tspan x="800" dy="17">DHT11 và Battery</tspan></text>
+    <path class="flow" d="M800 516V537"></path>
+    <rect class="shape" x="690" y="537" width="220" height="58" rx="3"></rect>
+    <text x="800" y="561"><tspan x="800">Cập nhật snapshot</tspan><tspan x="800" dy="17">và timestamp</tspan></text>
+    <path class="flow" d="M800 595V616"></path>
+    <polygon class="shape decision" points="800,616 915,668 800,720 685,668"></polygon>
+    <text x="800" y="664"><tspan x="800">Nguồn yêu cầu</tspan><tspan x="800" dy="17">là gì?</tspan></text>
+    <path class="flow" d="M685 668H625V746"></path>
+    <text class="edge-label" x="654" y="657">REQ</text>
+    <rect class="shape" x="575" y="746" width="170" height="54" rx="3"></rect>
+    <text x="660" y="778">Set SENSOR_READY</text>
+    <path class="flow" d="M800 720V746"></path>
+    <text class="edge-label" x="822" y="735">AUTO</text>
+    <rect class="shape" x="755" y="746" width="180" height="54" rx="3"></rect>
+    <text x="845" y="769"><tspan x="845">Set</tspan><tspan x="845" dy="17">IRRIGATION_READY</tspan></text>
+    <path class="flow" d="M915 668H975V746"></path>
+    <text class="edge-label" x="947" y="657">TELEMETRY</text>
+    <rect class="shape" x="945" y="746" width="85" height="54" rx="3"></rect>
+    <text x="987" y="769"><tspan x="987">telemetry</tspan><tspan x="987" dy="17">ready</tspan></text>
+    <path class="return" d="M660 800V890H800V438"></path>
+    <path class="return" d="M845 800V890H800"></path>
+    <path class="return" d="M987 800V890H800"></path>
+
+    <!-- IrrigationTask -->
+    <ellipse class="shape terminal" cx="1330" cy="291" rx="104" ry="23"></ellipse>
+    <text x="1330" y="296">IrrigationTask chạy</text>
+    <path class="flow" d="M1330 314V334"></path>
+    <polygon class="shape decision" points="1330,334 1450,386 1330,438 1210,386"></polygon>
+    <text x="1330" y="382"><tspan x="1330">CONTROL_EXEC hoặc</tspan><tspan x="1330" dy="17">timeout 10 ms?</tspan></text>
+    <path class="flow" d="M1450 386H1525V465H1450"></path>
+    <text class="edge-label" x="1487" y="375">CONTROL</text>
+    <rect class="shape" x="1250" y="465" width="260" height="58" rx="3"></rect>
+    <text x="1380" y="489"><tspan x="1380">Xử lý MODE, THRESHOLD</tspan><tspan x="1380" dy="17">hoặc ZONE ON/OFF</tspan></text>
+    <path class="flow" d="M1380 523V545"></path>
+    <polygon class="shape decision" points="1380,545 1480,592 1380,639 1280,592"></polygon>
+    <text x="1380" y="588"><tspan x="1380">Thực thi</tspan><tspan x="1380" dy="17">thành công?</tspan></text>
+    <path class="flow" d="M1280 592H1200V660"></path>
+    <text class="edge-label" x="1238" y="581">KHÔNG</text>
+    <rect class="shape" x="1110" y="660" width="180" height="54" rx="3"></rect>
+    <text x="1200" y="692">Set CONTROL_ERROR</text>
+    <path class="flow" d="M1480 592H1530V660"></path>
+    <text class="edge-label" x="1507" y="581">CÓ</text>
+    <rect class="shape" x="1430" y="660" width="130" height="54" rx="3"></rect>
+    <text x="1495" y="692">Set CONTROL_OK</text>
+
+    <path class="flow" d="M1330 438V465H1190"></path>
+    <text class="edge-label" x="1260" y="453">TIMEOUT</text>
+    <rect class="shape" x="1098" y="465" width="170" height="58" rx="3"></rect>
+    <text x="1183" y="489"><tspan x="1183">Kiểm tra MANUAL</tspan><tspan x="1183" dy="17">timeout 60 giây</tspan></text>
+    <path class="flow" d="M1183 523V545"></path>
+    <polygon class="shape decision" points="1183,545 1263,592 1183,639 1103,592"></polygon>
+    <text x="1183" y="588"><tspan x="1183">Đang ở</tspan><tspan x="1183" dy="17">AUTO?</tspan></text>
+    <path class="flow" d="M1183 639V738"></path>
+    <text class="edge-label" x="1205" y="654">CÓ</text>
+    <rect class="shape" x="1088" y="738" width="190" height="70" rx="3"></rect>
+    <text x="1183" y="764"><tspan x="1183">Cập nhật AUTO FSM</tspan><tspan x="1183" dy="17">IDLE → WATER → SOAK</tspan><tspan x="1183" dy="17">MEASURE → FAILED</tspan></text>
+    <path class="return" d="M1183 808V892H1330V438"></path>
+    <path class="return" d="M1103 592H1088V892H1183"></path>
+    <text class="edge-label" x="1095" y="581">KHÔNG</text>
+    <path class="return" d="M1200 714V892"></path>
+    <path class="return" d="M1495 714V892H1330"></path>
+
+    <!-- Inter-task thread flags -->
+    <path class="signal" d="M375 659H678V386"></path>
+    <text class="signal-label" x="535" y="647">SENSOR_READ_SIGNAL</text>
+    <path class="signal" d="M575 773H520V688H375"></path>
+    <text class="signal-label" x="539" y="760">SENSOR_READY_SIGNAL</text>
+
+    <path class="signal" d="M500 659H1065V386H1210"></path>
+    <text class="signal-label" x="790" y="647">CONTROL_EXEC_SIGNAL</text>
+    <path class="signal" d="M1110 687H520V688H500"></path>
+    <text class="signal-label" x="815" y="677">CONTROL_ERROR_SIGNAL</text>
+    <path class="signal" d="M1430 687H520V671H500"></path>
+    <text class="signal-label" x="955" y="660">CONTROL_OK_SIGNAL</text>
+
+    <path class="signal" d="M285 476H550V386H678"></path>
+    <text class="signal-label" x="470" y="464">TELEMETRY_READ_SIGNAL</text>
+    <path class="signal" d="M1088 773H1038V668H915"></path>
+    <text class="signal-label" x="1032" y="757">IRRIGATION_READ_SIGNAL</text>
+    <path class="signal" d="M935 773H1060V738H1088"></path>
+    <text class="signal-label" x="1012" y="762">IRRIGATION_READY_SIGNAL</text>
+  </svg>
+</div>
